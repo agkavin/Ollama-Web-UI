@@ -4,9 +4,11 @@ import { MessageSquare, Plus, Settings, X } from "lucide-react";
 const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
   return (
     <div
-      className={`fixed inset-y-0 left-0 ${
+      className={`fixed inset-y-0 left-0 w-64 tranition ease-in-out ${
         darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-      } transition-all duration-300 z-50 ${isOpen ? "w-64" : "-translate-x-full"}`}
+      } transform transition-transform duration-500 z-50 ${
+        isOpen ? "translate-x-0" : "-translate-x-full" 
+      }`}
     >
       {/* Sidebar Header */}
       <div className="p-4 flex justify-between items-center border-b border-gray-700">
