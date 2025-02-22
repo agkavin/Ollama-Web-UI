@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 #local imports
-from utils.chat_with_history import ChatWithHistory
-from utils.pydantic_models import QueryRequest, QueryResponse
+from pages.chat_page import ChatPage
+from pydantic_models import *
 
 app = FastAPI()
 
@@ -17,16 +17,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-chat_history = ChatWithHistory(model="llama3.1")
+chat_page = ChatPage()
 
-@app.post("/ask", response_model=QueryResponse)
-async def ask(query: QueryRequest):
+@app.post("/ask", response_model=NormalChatResponse)
+async def ask(query: NormalChatRequest):
     try:
-        response = chat_history.ask(query.query)
-        return QueryResponse(text=response)
+        response = chat_page.ask(query.query)
+        return NormalChatResponse(text=response)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@app.get("/models", response_model=GetModelsResponse)
+async def get_models():
+    return chat_page.get_models()
+
+
 
 if __name__ == "__main__":
     import uvicorn
