@@ -15,30 +15,27 @@ const App = () => {
   return (
     <div className={darkMode ? "dark" : ""}>
       <div className="flex h-screen">
-        {/* Sidebar with transition */}
+        {/* Sidebar container with smooth width transition */}
         <div
           style={{
             width: sidebarOpen ? sidebarWidth : 0,
             transition: "width 0.5s ease",
-            overflow: "hidden",
+            overflow: "hidden" // Prevent sidebar content from spilling out when closed
           }}
         >
-          {sidebarOpen && (
-            <Sidebar
-              isOpen={sidebarOpen}
-              toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-              darkMode={darkMode}
-            />
-          )}
+          <Sidebar
+            isOpen={sidebarOpen}
+            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            darkMode={darkMode}
+          />
         </div>
-
-        {/* Main content (Navbar + Chat) */}
+        
+        {/* Chat and Navbar container */}
         <div className="flex-1 flex flex-col">
           <Navbar
             toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             darkMode={darkMode}
             setDarkMode={setDarkMode}
-            setSidebarOpen={setSidebarOpen} // ✅ FIX: Now passing setSidebarOpen
           />
           <ChatComponent darkMode={darkMode} sidebarOpen={sidebarOpen} />
         </div>

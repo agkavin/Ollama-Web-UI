@@ -1,19 +1,11 @@
-
-
 import React, { useEffect, useState } from "react";
 import { MessageSquare, Plus, Settings, X } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
   const [messages, setMessages] = useState(() => {
-    try {
-      const storedMessages = localStorage.getItem("chatList");
-      return Array.isArray(JSON.parse(storedMessages)) ? JSON.parse(storedMessages) : [];
-    } catch (error) {
-      console.error("Error parsing chatList:", error);
-      return [];
-    }
+    const storedMessages = localStorage.getItem("chatList");
+    return storedMessages ? JSON.parse(storedMessages) : [];
   });
-  
 
   useEffect(() => {
     localStorage.setItem("chatList", JSON.stringify(messages));
@@ -44,7 +36,6 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
-      {/* Sidebar Header */}
       <div className="p-4 flex justify-between items-center border-b border-gray-700">
         <h2 className="text-lg font-semibold">ChatGPT</h2>
         <button onClick={toggleSidebar} className="p-2 hover:bg-gray-700 rounded-lg">
@@ -52,7 +43,6 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         </button>
       </div>
 
-      {/* New Chat Button */}
       <div className="p-4">
         <button className="flex items-center gap-2 w-full p-3 hover:bg-gray-700 rounded-lg" onClick={updateMessages}>
           <Plus size={16} />
@@ -75,7 +65,6 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         </div>
       </div>
 
-      {/* Settings */}
       <div className="absolute bottom-0 w-full p-4 border-t border-gray-700">
         <div className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
           <Settings size={16} />

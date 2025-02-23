@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import { FiSend } from "react-icons/fi";
 
@@ -8,7 +6,6 @@ const ChatComponent = ({ darkMode }) => {
   const [input, setInput] = useState("");
   const [selectedChat, setSelectedChat] = useState(localStorage.getItem("selectedChat") || "");
 
-  // Load messages when selectedChat changes
   useEffect(() => {
     if (!selectedChat) return;
     const storedMessages = localStorage.getItem(selectedChat);
@@ -19,11 +16,10 @@ const ChatComponent = ({ darkMode }) => {
         console.error("Error parsing stored messages:", error);
       }
     } else {
-      setMessages([]); // If no messages, reset to empty
+      setMessages([]);
     }
   }, [selectedChat]);
 
-  // Listen for selectedChat updates from localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       setSelectedChat(localStorage.getItem("selectedChat") || "");
@@ -35,10 +31,10 @@ const ChatComponent = ({ darkMode }) => {
     };
   }, []);
 
-  const handleSubmit = async (e) =>  {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || !selectedChat) return;
-    try{
+    try {
       const response = await fetch("http://192.168.12.1:8000/ask", {
         method: "POST",
         headers: {
@@ -48,56 +44,63 @@ const ChatComponent = ({ darkMode }) => {
       });
       const data = await response.json();
       console.log(data);
-      const newMessages = [...messages, { role: "user", content: input }, {role: "assistant", content: data['text']}];
-    setMessages(newMessages);
-    localStorage.setItem(selectedChat, JSON.stringify(newMessages));
-    console.log(localStorage.getItem(selectedChat));
-    setInput("");
-    }catch(e){
-
+      const newMessages = [
+        ...messages,
+        { role: "user", content: input },
+        { role: "assistant", content: data["text"] },
+      ];
+      setMessages(newMessages);
+      localStorage.setItem(selectedChat, JSON.stringify(newMessages));
+      console.log(localStorage.getItem(selectedChat));
+      setInput("");
+    } catch (e) {
+      console.error("Error:", e);
     }
     setInput("");
-    
   };
 
   return (
     <div
-    className={`flex flex-col h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}
-
+      className={`flex flex-col h-screen ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      }`}
     >
+      {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.role === "assistant" ? "bg-gray-300 mr-10" : "bg-blue-500 ml-10"} p-4 rounded-lg`}
-
+            className={`flex items-center ${
+              message.role === "assistant" ? "justify-start" : "justify-end"
+            }`}
           >
-            <div className="flex-shrink-0 mr-4">
-              {message.role === "assistant" ? (
-                <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center text-black">AI</div>
-              ) : (
-                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white">U</div>
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="text-lg">{message.content}</p>
+            <div
+              className={`max-w-xs md:max-w-md p-3 rounded-2xl shadow-md ${
+                message.role === "assistant"
+                  ? "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white"
+                  : "bg-blue-500 text-white dark:bg-blue-600"
+              }`}
+            >
+              <p className="text-sm">{message.content}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Input area */}
-      <div className="p-4 border-t">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="p-4 border-t bg-white dark:bg-gray-800">
+        <form onSubmit={handleSubmit} className="relative flex items-center w-full">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            
+            className="w-full p-3 pr-12 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             placeholder="Type your message..."
-            className="flex-1 p-4 border rounded-lg focus:outline-none text-black "
           />
-          <button type="submit" className="p-2 bg-blue-500 text-white rounded-lg">
+          <button
+            type="submit"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition dark:bg-blue-600 dark:hover:bg-blue-700"
+          >
             <FiSend size={20} />
           </button>
         </form>
