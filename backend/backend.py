@@ -183,7 +183,19 @@ async def update_config(config: UpdateConfigRequest):
             detail=str(e)
         )
     
-
+@app.post("/clear-vector-db", 
+          response_model=ClearVectorDBResponse,
+          status_code=status.HTTP_200_OK)
+async def clear_vector_db(request: ClearVectorDBRequest):
+    try:
+        settings_page.clear_vector_db(request.request)
+        return ClearVectorDBResponse(response=True)
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 @app.get("/")
 async def root():

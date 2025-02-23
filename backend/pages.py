@@ -1,6 +1,7 @@
 import ollama
 from typing import List, Dict, Any
 import os
+import shutil
 from utils.chat_with_history import ChatWithHistory
 from utils.chat_with_file import ChatWithFiles
 from utils.chat_with_web import WebSearchRAG
@@ -94,14 +95,14 @@ class SettingsPage:
         if top_k:
             self.web_search.set_top_k(top_k)
 
-    def clear_vector_db(self):
+    def clear_vector_db(self, request: str) -> bool:
         try:
-            directories = ["../temp/vector_store", "../temp/web_vector_store"]
+            directories = [self.chat_files.vector_store_dir, self.web_search.vector_store_dir]
             for directory in directories:
                 print(f"Checking existence of {directory}")
                 if os.path.exists(directory):
                     print(f"Directory exists: {directory}")
-                    os.rmdir(directory)
+                    shutil.rmtree(directory)
                     print(f"Successfully deleted {directory}")
                 else:
                     print(f"Directory does not exist: {directory}")

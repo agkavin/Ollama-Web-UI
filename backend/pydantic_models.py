@@ -39,9 +39,9 @@ class ChatWithFileResponse(BaseModel):
     response: str
 
 class ClearVectorDBRequest(BaseModel):
-    clear: str
+    request: str
 class ClearVectorDBResponse(BaseModel):
-    result: bool
+    response: bool
 
 class ConfigResponse(BaseModel):
     embedding_model: str
