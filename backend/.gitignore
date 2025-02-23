@@ -2,3 +2,4 @@ backend/utils/__pycache__/*
 **/__pycache__/*
 temp/vector_store/*
 temp/web_search_vectors/*
+config/*

@@ -18,16 +18,21 @@ import re
 import faiss
 
 class WebSearchRAG:
-    def __init__(self,model_data,vector_store_dir: str = "../temp/web_search_vectors", config_path: str = "../temp/web_config.json"):
+    def __init__(self,model_data,vector_store_dir: str = "../temp/web_search_vectors", config_path: str = "../config/config.json"):
         current_model = model_data.get_current_model()
         if not current_model:
             raise ValueError("No model selected")
+        
         self.vector_store_dir = vector_store_dir
         self.config_path = config_path
+
         self.load_config()
+
+        if not os.path.exists(self.config_path):
+            self.save_config()
         
         self.embeddings = OllamaEmbeddings(
-            model="nomic-embed-text",
+            model=self.config["embedding_model"],
             base_url="http://localhost:11434"
         )
         
@@ -42,7 +47,11 @@ class WebSearchRAG:
 
     def load_config(self):
         default_config = {
-            "top_k": 5
+            "embedding_model": "nomic-embed-text",
+            "num_chunks": 3,
+            "chunk_size": 1000,
+            "chunk_overlap": 100,
+            "top_k": 3
         }
         
         if os.path.exists(self.config_path):
@@ -64,9 +73,13 @@ class WebSearchRAG:
                 allow_dangerous_deserialization=True
             )
         else:
-            self.vector_store = FAISS.from_texts(
-                ["Initial document"], 
-                self.embeddings
+            single_vector = self.embeddings.embed_query("dummy text")
+            index = faiss.IndexFlatL2(len(single_vector))
+            self.vector_store = FAISS(
+                embedding_function=self.embeddings,
+                index=index,
+                docstore=InMemoryDocstore(),
+                index_to_docstore_id={}
             )
 
     def setup_chain(self):

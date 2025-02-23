@@ -21,6 +21,7 @@ app.add_middleware(
 )
 
 chat_page = ChatPage()
+settings_page = SettingsPage()
 
 @app.post("/ask", response_model=NormalChatResponse)
 async def ask(query: NormalChatRequest):
@@ -147,7 +148,42 @@ async def perform_web_search(query: NormalChatRequest):
         return WebSearchResponse(reply=reply)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/get-config", 
+         response_model=ConfigResponse,
+         status_code=status.HTTP_200_OK)
+async def get_config():
+    try:
+        config = settings_page.get_config()
+        return ConfigResponse(**config)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@app.post("/update-config",
+         response_model=ConfigResponse,
+         status_code=status.HTTP_200_OK)
+async def update_config(config: UpdateConfigRequest):
+    try:
+        settings_page.update_config(
+            embedding_model=config.embedding_model,
+            num_chunks=config.num_chunks,
+            chunk_size=config.chunk_size,
+            chunk_overlap=config.chunk_overlap,
+            top_k=config.top_k
+        )
+        # Return the updated configuration
+        return ConfigResponse(**settings_page.get_config())
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
     
+
 
 @app.get("/")
 async def root():

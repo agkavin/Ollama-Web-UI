@@ -11,15 +11,21 @@ from langchain_community.document_loaders import PyMuPDFLoader
 import faiss
 
 class ChatWithFiles:
-    def __init__(self,model_data,vector_store_dir: str = "../temp/vector_store", config_path: str = "../temp/config.json"):
+    def __init__(self, model_data, vector_store_dir: str = "../temp/vector_store", config_path: str = "../config/config.json"):
         current_model = model_data.get_current_model()
         if not current_model:
             raise ValueError("No model selected")
         
         self.vector_store_dir = vector_store_dir
         self.config_path = config_path
+
+        # Load configuration (create it if it doesn't exist)
         self.load_config()
-        
+
+        if not os.path.exists(self.config_path):
+            self.save_config()
+
+        # Initialize embeddings and language model
         self.embeddings = OllamaEmbeddings(
             model=self.config["embedding_model"],
             base_url="http://localhost:11434"
@@ -30,7 +36,10 @@ class ChatWithFiles:
             base_url="http://localhost:11434"
         )
         
-        os.makedirs(vector_store_dir, exist_ok=True)
+        # Create directory for vector store if it doesn't exist
+        os.makedirs(self.vector_store_dir, exist_ok=True)
+
+        # Initialize vector store and RAG chain
         self.initialize_vector_store()
         self.setup_rag_chain()
 
@@ -39,7 +48,8 @@ class ChatWithFiles:
             "embedding_model": "nomic-embed-text",
             "num_chunks": 3,
             "chunk_size": 1000,
-            "chunk_overlap": 100
+            "chunk_overlap": 100,
+            "top_k": 3
         }
         
         if os.path.exists(self.config_path):
@@ -50,10 +60,13 @@ class ChatWithFiles:
             self.save_config()
 
     def save_config(self):
+        if not os.path.exists(os.path.dirname(self.config_path)):
+            os.makedirs(os.path.dirname(self.config_path))
         with open(self.config_path, 'w') as f:
             json.dump(self.config, f)
 
     def initialize_vector_store(self):
+        # Check if the FAISS index exists, if not, create one
         if os.path.exists(os.path.join(self.vector_store_dir, "index.faiss")):
             self.vector_store = FAISS.load_local(
                 self.vector_store_dir,
@@ -61,6 +74,7 @@ class ChatWithFiles:
                 allow_dangerous_deserialization=True
             )
         else:
+            # Initialize an empty FAISS index if none exists
             single_vector = self.embeddings.embed_query("dummy text")
             index = faiss.IndexFlatL2(len(single_vector))
             self.vector_store = FAISS(
@@ -71,6 +85,7 @@ class ChatWithFiles:
             )
 
     def setup_rag_chain(self):
+        # Define the prompt template
         prompt = ChatPromptTemplate.from_template("""
             Answer the question based on the provided context. If you can't find 
             the answer in the context, say "I don't have enough information to answer that."
@@ -84,11 +99,13 @@ class ChatWithFiles:
         def format_docs(docs):
             return "\n\n".join([doc.page_content for doc in docs])
 
+        # Create the retriever for RAG
         retriever = self.vector_store.as_retriever(
             search_type="similarity",
             search_kwargs={'k': self.config["num_chunks"]}
         )
 
+        # Setup the chain
         self.chain = (
             {
                 "context": retriever | format_docs,
@@ -138,18 +155,23 @@ class ChatWithFiles:
                 loader = PyMuPDFLoader(file_path)
                 documents = loader.load()
 
-            if documents is None or len(documents) == 0:
-                raise ValueError("No documents found in the PDF file.")
+                if not documents:
+                    return False
             
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=self.config["chunk_size"],
-                chunk_overlap=self.config["chunk_overlap"]
-            )
-            
-            chunks = text_splitter.split_documents(documents)
-            self.vector_store.add_documents(documents=chunks)
-            self.vector_store.save_local(self.vector_store_dir)
-            return True
+                # Split documents into chunks
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=self.config["chunk_size"],
+                    chunk_overlap=self.config["chunk_overlap"]
+                )
+                chunks = text_splitter.split_documents(documents)
+                
+                # Add chunks to the vector store
+                self.vector_store.add_documents(chunks)
+                
+                # Save the updated vector store
+                self.vector_store.save_local(self.vector_store_dir)
+                return True
+                
         except Exception as e:
             print(f"Error processing document: {str(e)}")
             return False
@@ -159,6 +181,3 @@ class ChatWithFiles:
             return self.chain.invoke(question)
         except Exception as e:
             return f"Error generating response: {str(e)}"
-        
-
-    
