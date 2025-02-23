@@ -20,7 +20,6 @@ Ensure you have the following installed:
 - [Node.js](https://nodejs.org/) (Latest LTS recommended)
 - [Vite Official Guide](https://vitejs.dev/guide/)
 - **Ollama (Local AI Provider)** - [Installation Guide](https://ollama.ai/)
-- **Any OpenAI API Compatible Endpoint** (LM Studio, llamafile, etc.)
 
 ### Clone the repository
 ```bash
@@ -60,10 +59,7 @@ You can now interact with your local AI models via the Web UI.
 | Brave      | ✅     | ✅             | ✅          |
 | Firefox    | ✅     | ✅             | ✅          |
 | Edge       | ✅     | ✅             | ✅          |
-| Vivaldi    | ✅     | ✅             | ✅          |
-| LibreWolf  | ✅     | ✅             | ✅          |
-| Opera      | ✅     | ❌             | ❌          |
-| Arc        | ✅     | ❌             | ❌          |
+| Safari     | ✅     | ✅             | ✅          |
 
 ## API Endpoints
 
