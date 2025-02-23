@@ -81,8 +81,9 @@ You can now interact with your local AI models via the Web UI.
 Ollama WebUI does not collect any personal data. All processing happens locally on your machine, ensuring complete privacy.
 
 ## Demo
-[https://youtu.be/YnB7Fth7cnA?feature=shared]
+
 (https://drive.google.com/file/d/19TWyPilMgIzFWQK5Op2NWshhIGnesxqo/view?usp=sharing)
+[https://youtu.be/YnB7Fth7cnA?feature=shared]
 
 ## Contributing
 Contributions are welcome! If you have ideas, feature requests, or bug reports, create an issue or submit a pull request.
