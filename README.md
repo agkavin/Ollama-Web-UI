@@ -24,7 +24,7 @@ Ensure you have the following installed:
 
 ### Clone the repository
 ```bash
-git clone [https://github.com//ollama-webui.git](https://github.com/agkavin/Ollama-Web-UI)
+git clone https://github.com/agkavin/Ollama-Web-UI
 cd ollama-webui
 ```
 
