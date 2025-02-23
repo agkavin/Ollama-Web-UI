@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, UserCircle, SlidersHorizontal, Sun, Moon, Settings } from "lucide-react";
-import SettingsSidebar from "./SettingsSidebar";
+
 
 const Navbar = ({ toggleSidebar, darkMode, setDarkMode, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -72,10 +72,7 @@ const Navbar = ({ toggleSidebar, darkMode, setDarkMode, setSidebarOpen }) => {
     <div className="h-16 bg-gray-800 text-white flex items-center px-4 justify-between relative">
       {/* Sidebar Toggle Button */}
       <button
-        onClick={() => {
-          setSidebarOpen((prev) => !prev);
-          setIsSettingsOpen(false);
-        }}
+        onClick={toggleSidebar }
         className="p-2 rounded-lg transition-all duration-300 hover:bg-gray-600"
       >
         <Menu size={20} />
@@ -127,21 +124,10 @@ const Navbar = ({ toggleSidebar, darkMode, setDarkMode, setSidebarOpen }) => {
         </div>
 
         {/* User Dropdown */}
-        <div className="relative group">
-          <button className="p-2 rounded-lg transition-all duration-300 hover:bg-gray-600">
-            <UserCircle size={20} />
-          </button>
-          <div className="absolute right-0 mt-2 w-40 bg-gray-700 rounded-lg shadow-lg hidden group-hover:block">
-            <p className="px-4 py-2 text-gray-300">Username</p>
-            <button className="block w-full px-4 py-2 text-left hover:bg-gray-600">
-              Logout
-            </button>
-          </div>
-        </div>
+      
       </div>
 
-      {/* Settings Sidebar */}
-      <SettingsSidebar isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
     </div>
   );
 };

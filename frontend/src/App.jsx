@@ -32,12 +32,10 @@ const App = () => {
         
         {/* Chat and Navbar container */}
         <div className="flex-1 flex flex-col">
-          <Navbar
-            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
-          />
-          <ChatComponent darkMode={darkMode} sidebarOpen={sidebarOpen} />
+          
+          <ChatComponent darkMode={darkMode} sidebarOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          
+            setDarkMode={setDarkMode}/>
         </div>
       </div>
     </div>

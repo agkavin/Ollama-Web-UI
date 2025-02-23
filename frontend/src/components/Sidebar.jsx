@@ -34,17 +34,22 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
       } transform transition-transform duration-500 z-50 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      } flex flex-col`}
     >
+      {/* Header - Fixed */}
       <div className="p-4 flex justify-between items-center border-b border-gray-700">
-        <h2 className="text-lg font-semibold">ChatGPT</h2>
+        <h2 className="text-lg font-semibold">Ollama-Web-UI</h2>
         <button onClick={toggleSidebar} className="p-2 hover:bg-gray-700 rounded-lg">
           <X size={20} />
         </button>
       </div>
 
-      <div className="p-4">
-        <button className="flex items-center gap-2 w-full p-3 hover:bg-gray-700 rounded-lg" onClick={updateMessages}>
+      {/* Scrollable Chat List */}
+      <div className="flex-1 overflow-y-auto max-h-[calc(100vh-120px)] p-4">
+        <button
+          className="flex items-center gap-2 w-full p-3 hover:bg-gray-700 rounded-lg"
+          onClick={updateMessages}
+        >
           <Plus size={16} />
           <span>New Chat</span>
         </button>
@@ -65,7 +70,8 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         </div>
       </div>
 
-      <div className="absolute bottom-0 w-full p-4 border-t border-gray-700">
+      {/* Footer - Fixed */}
+      <div className="p-4 border-t border-gray-700">
         <div className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
           <Settings size={16} />
           <span>Settings</span>

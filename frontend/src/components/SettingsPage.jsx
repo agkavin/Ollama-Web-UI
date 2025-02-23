@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaCog, FaInfoCircle } from "react-icons/fa";
 
 // Reusable Toggle Switch Component
@@ -21,17 +21,37 @@ const ToggleSwitch = ({ checked, onChange }) => {
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("general");
-  const [generalSettings, setGeneralSettings] = useState({
-    totalSearchResults: 5,
-    internetSearch: false,
-    exportHistory: false,
-  });
+  // const [generalSettings, setGeneralSettings] = useState(-1);
   const [ragSettings, setRagSettings] = useState({
-    embeddingModel: "nomic-embed-text",
-    chunkSize: 1000,
-    chunkOverlap: 200,
-    retrievedDocs: 4,
+    embeddingModel: "",
+    chunkSize: -1,
+    chunkOverlap: -1,
+    retrievedDocs: -1,
   });
+
+  useEffect(() => {
+    const fetchCurrentStatus = async () => {
+      try {
+        const response = await fetch("http://192.168.12.1:8000/get-config");
+        const data = await response.json();
+        console.log("Current Model:", data);
+
+        // Mapping API response to state
+        setRagSettings({
+          embeddingModel: data.embedding_model || "",
+          chunkSize: data.chunk_size || -1,
+          chunkOverlap: data.chunk_overlap || -1,
+          retrievedDocs: data.top_k || -1,  // Mapping top_k to retrievedDocs
+        });
+        // setGeneralSettings(data.top_k);
+
+      } catch (error) {
+        console.error("Error fetching current model:", error);
+      }
+    };
+
+    fetchCurrentStatus();
+  }, []);// Runs only on mount
 
   const handleGeneralChange = (key, value) => {
     setGeneralSettings((prev) => ({ ...prev, [key]: value }));
@@ -43,9 +63,9 @@ const SettingsPage = () => {
 
   // Save all settings as a single JSON payload to /mainsetting
   const saveSettings = async () => {
-    const payload = { ...generalSettings, ...ragSettings };
+    const payload = { 'top_k': ragSettings.retrievedDocs, 'embedding_model': ragSettings.embeddingModel, 'chunk_size':ragSettings.chunkSize, 'chunk_overlap': ragSettings.chunkOverlap };
     try {
-      const response = await fetch("http://192.168.12.1:8000/main-setting", {
+      const response = await fetch("http://192.168.12.1:8000/update-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -68,7 +88,7 @@ const SettingsPage = () => {
         const response = await fetch("http://192.168.12.1:8000/clear-vector-db", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-        body: JSON.stringify("Delete Accepted"),
+        body: JSON.stringify({"request":"delete"}),
         });
         if (response.ok) {
           setRagSettings({ embeddingModel: "", chunkSize: 0, chunkOverlap: 0, retrievedDocs: 0 });
@@ -122,26 +142,11 @@ const SettingsPage = () => {
                 <input
                   type="number"
                   className="bg-gray-700 text-white p-2 rounded w-24"
-                  value={generalSettings.totalSearchResults}
+                  value={ragSettings.retrievedDocs}
                   onChange={(e) => handleGeneralChange("totalSearchResults", e.target.value)}
                 />
               </div>
-              {/* Internet Search ON by default */}
-              <div className="flex justify-between items-center bg-gray-800 p-3 rounded">
-                <span>Internet Search ON by default</span>
-                <ToggleSwitch
-                  checked={generalSettings.internetSearch}
-                  onChange={(value) => handleGeneralChange("internetSearch", value)}
-                />
-              </div>
-              {/* Export Chat History, Knowledge Base, and Prompts */}
-              <div className="flex justify-between items-center bg-gray-800 p-3 rounded">
-                <span>Export Chat History, Knowledge Base, and Prompts</span>
-                <ToggleSwitch
-                  checked={generalSettings.exportHistory}
-                  onChange={(value) => handleGeneralChange("exportHistory", value)}
-                />
-              </div>
+              
             </div>
 
             <h2 className="text-2xl font-bold mb-6 mt-6">RAG Settings</h2>
@@ -149,14 +154,12 @@ const SettingsPage = () => {
               {/* Embedding Model */}
               <div className="flex justify-between items-center bg-gray-800 p-3 rounded">
                 <span>Embedding Model</span>
-                <select
-                  className="bg-gray-700 text-white p-2 rounded"
+                <input
+                  type="text"
+                  className="bg-gray-700 text-white p-2 rounded w-24"
                   value={ragSettings.embeddingModel}
                   onChange={(e) => handleRagChange("embeddingModel", e.target.value)}
-                >
-                  <option>nomic-embed-text</option>
-                  <option>OpenAI Ada</option>
-                </select>
+                />
               </div>
               {/* Chunk Size */}
               <div className="flex justify-between items-center bg-gray-800 p-3 rounded">
@@ -190,7 +193,7 @@ const SettingsPage = () => {
               </div>
             </div>
             <div className="mt-6 flex space-x-4 justify-center">
-              <button className="bg-green-600 px-4 py-2 rounded" onClick={saveSettings}>
+              <button className="bg-blue-600 px-4 py-2 rounded" onClick={saveSettings}>
                 Save Settings
               </button>
               <button className="bg-red-600 px-4 py-2 rounded" onClick={clearVectorSettings}>
@@ -201,11 +204,19 @@ const SettingsPage = () => {
         )}
 
         {activeTab === "about" && (
-          <>
-            <h2 className="text-2xl font-bold mb-6">About</h2>
-            <p>This settings panel allows users to configure application preferences, including advanced RAG settings and general options.</p>
-            <p className="mt-2">Developed using React and TailwindCSS.</p>
-          </>
+         <>
+         <h2 className="text-2xl font-bold mb-6">About</h2>
+         <p>
+           This project is an open-source UI for <strong>Ollama</strong>, designed to enhance user experience by providing an intuitive and customizable interface for managing AI models and settings.
+         </p>
+         <p className="mt-2">
+           Built with <strong>React</strong> and <strong>TailwindCSS</strong>, it enables seamless configuration of application preferences, including advanced <strong>RAG (Retrieval-Augmented Generation)</strong> settings and general options.
+         </p>
+         <p className="mt-2">
+           Developed as part of the <strong>FOSS Hackathon</strong>, this project aims to contribute to the open-source community by making AI-driven applications more accessible and user-friendly.
+         </p>
+       </>
+       
         )}
       </div>
     </div>
