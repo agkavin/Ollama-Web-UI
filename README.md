@@ -37,18 +37,18 @@ pip install -r requirements.txt
 python app.py  # Start the backend server
 ```
 
-### Frontend Setup (React + Bun)
+### Frontend Setup (React + Vite)
 ```bash
 cd frontend
-bun install
-bun run dev  # Start the frontend development server
+npm install
+npm run dev  # Start the frontend development server
 ```
 
 ## Usage
 
 Once the setup is complete, open your browser and go to:
 ```
-http://localhost:3000
+http://localhost:5173
 ```
 You can now interact with your local AI models via the Web UI.
 
