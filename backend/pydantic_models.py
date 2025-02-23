@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 
 
 # Request/Response models
@@ -21,23 +21,25 @@ class SetModelResponse(BaseModel):
 class GetCurrentModelResponse(BaseModel):
     get_current_model: str
 
-
-class AddDocumentResponse(BaseModel):
-    success: bool
-
 class WebSearchRequest(BaseModel):
     query: str
 
 class WebSearchResponse(BaseModel):
     reply: str
 
+class AddDocumentResponse(BaseModel):
+    success: bool
+    # message: Optional[str] = None
+    # filename: Optional[str] = None
+
 class ChatWithFileRequest(BaseModel):
-    query: str  
+    request: str  
 
 class ChatWithFileResponse(BaseModel):
-    result: str
+    response: str
 
 class ClearVectorDBRequest(BaseModel):
     clear: str
 class ClearVectorDBResponse(BaseModel):
     result: bool
+

@@ -137,6 +137,9 @@ class ChatWithFiles:
             if file_path.endswith(".pdf"):
                 loader = PyMuPDFLoader(file_path)
                 documents = loader.load()
+
+            if documents is None or len(documents) == 0:
+                raise ValueError("No documents found in the PDF file.")
             
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=self.config["chunk_size"],

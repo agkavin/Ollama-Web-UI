@@ -185,7 +185,9 @@ class WebSearchRAG:
                 metadatas = [doc.metadata for doc in documents]
                 self.vector_store.add_texts(texts, metadatas=metadatas)
             
-            return self.chain.invoke(query)
+            res = self.chain.invoke(query)
+            print("response: ", res)
+            return res
             
         except Exception as e:
             return {"error": f"Error processing web search: {str(e)}"}

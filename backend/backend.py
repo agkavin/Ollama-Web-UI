@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import shutil
+from pathlib import Path
 
 #local imports
 from pages import ChatPage, SettingsPage
@@ -34,10 +35,10 @@ async def get_models():
     return chat_page.get_models()
 
 @app.post("/set-model", response_model=SetModelResponse)
-async def set_model(model: SetModelRequest):
+async def set_model(update_model: SetModelRequest):
     try:
-        chat_page.set_model(model.model)
-        return SetModelResponse(message="Model set successfully")
+        chat_page.set_model(update_model.update_model)
+        return SetModelResponse(success=True)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -45,66 +46,95 @@ async def set_model(model: SetModelRequest):
 async def get_current_model():
     return chat_page.get_current_model()
 
-from fastapi import File, UploadFile
 
-# Initialize the upload manager
-@app.post("/add-document", response_model=AddDocumentResponse)
+@app.post("/add-document", 
+          response_model=AddDocumentResponse,
+          status_code=status.HTTP_201_CREATED)
 async def add_document(file: UploadFile = File(...)):
-    # Validate file type (only allow PDFs for now based on the ChatWithFiles implementation)
-    if not file.filename.endswith('.pdf'):
+    # Validate file existence
+    if not file:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file uploaded"
+        )
+    
+    # Validate file type
+    if not file.filename.lower().endswith('.pdf'):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail="Only PDF files are currently supported"
         )
     
     try:
         # Create temp directory if it doesn't exist
-        os.makedirs("temp", exist_ok=True)
+        temp_dir = Path("temp")
+        temp_dir.mkdir(exist_ok=True)
         
-        # Create a temporary file path
-        temp_file_path = os.path.join("temp", file.filename)
+        # Generate safe filename and create full path
+        safe_filename = file.filename.replace(" ", "_")
+        temp_file_path = temp_dir / safe_filename
         
         # Save uploaded file to temporary location
         try:
-            with open(temp_file_path, "wb") as buffer:
+            with temp_file_path.open("wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
         finally:
-            file.file.close()  # Ensure file is closed
+            await file.close()  # Ensure file is closed using await
             
-        # Add document to vector store using ChatWithFiles
-        success = chat_page.add_document(temp_file_path)
+        # Process document using ChatWithFiles
+        success = chat_page.add_document(str(temp_file_path))
         
-        # Clean up temporary file
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
-            
         if not success:
             raise HTTPException(
-                status_code=500,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to process document"
             )
             
-        return AddDocumentResponse(success=True)
+        return AddDocumentResponse(
+            success=True
+        )
         
     except Exception as e:
-        # Clean up temporary file in case of error
-        if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
+        # Log the error (you should replace this with proper logging)
+        print(f"Error processing document: {str(e)}")
         
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing document: {str(e)}"
         )
+        
+    finally:
+        # Clean up temporary file
+        if 'temp_file_path' in locals() and temp_file_path.exists():
+            temp_file_path.unlink()
     
-
+@app.post("/chat-with-file", 
+          response_model=ChatWithFileResponse,
+          status_code=status.HTTP_200_OK)
+async def chat_with_file(request: ChatWithFileRequest):
+    if not request.request.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Query cannot be empty"
+        )
     
-@app.post("/chat-with-file", response_model=NormalChatResponse)
-async def chat_with_file(query: NormalChatRequest):
     try:
-        response = chat_page.chat_with_file(query.query)
-        return NormalChatResponse(text=response)
+        # Use the ChatWithFiles instance to get response
+        response = chat_page.chat_with_file(request.request)
+        
+        if not response:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No relevant information found"
+            )
+            
+        return ChatWithFileResponse(response=response)
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating response: {str(e)}"
+        )
 
 @app.post("/perform-web-search", response_model=WebSearchResponse)
 async def perform_web_search(query: NormalChatRequest):
