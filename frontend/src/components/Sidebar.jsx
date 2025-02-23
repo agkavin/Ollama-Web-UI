@@ -1,12 +1,48 @@
-import React from "react";
+
+
+import React, { useEffect, useState } from "react";
 import { MessageSquare, Plus, Settings, X } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
+  const [messages, setMessages] = useState(() => {
+    try {
+      const storedMessages = localStorage.getItem("chatList");
+      return Array.isArray(JSON.parse(storedMessages)) ? JSON.parse(storedMessages) : [];
+    } catch (error) {
+      console.error("Error parsing chatList:", error);
+      return [];
+    }
+  });
+  
+
+  useEffect(() => {
+    localStorage.setItem("chatList", JSON.stringify(messages));
+  }, [messages]);
+
+  const updateMessages = () => {
+    const newMessage = {
+      id: crypto.randomUUID(),
+      title: "New Chat: " + (messages.length + 1),
+      createdAt: Date.now(),
+    };
+    const updatedMessages = [...messages, newMessage];
+
+    localStorage.setItem("chatList", JSON.stringify(updatedMessages));
+    setMessages(updatedMessages);
+  };
+
+  const selectChat = (id) => {
+    localStorage.setItem("selectedChat", id);
+    window.dispatchEvent(new Event("storage")); // Notify ChatComponent
+  };
+
   return (
     <div
-      className={`fixed inset-y-0 left-0 ${
+      className={`fixed inset-y-0 left-0 w-64 transition ease-in-out ${
         darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-      } transition-all duration-300 z-50 ${isOpen ? "w-64" : "-translate-x-full"}`}
+      } transform transition-transform duration-500 z-50 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
     >
       {/* Sidebar Header */}
       <div className="p-4 flex justify-between items-center border-b border-gray-700">
@@ -18,7 +54,7 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
 
       {/* New Chat Button */}
       <div className="p-4">
-        <button className="flex items-center gap-2 w-full p-3 hover:bg-gray-700 rounded-lg">
+        <button className="flex items-center gap-2 w-full p-3 hover:bg-gray-700 rounded-lg" onClick={updateMessages}>
           <Plus size={16} />
           <span>New Chat</span>
         </button>
@@ -26,10 +62,14 @@ const Sidebar = ({ isOpen, toggleSidebar, darkMode }) => {
         {/* Recent Chats */}
         <div className="mt-4 space-y-2">
           <div className="text-sm text-gray-400 px-3">Recent Chats</div>
-          {["Previous Chat 1", "Previous Chat 2", "Previous Chat 3"].map((chat, index) => (
-            <div key={index} className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
+          {messages.map((chat) => (
+            <div
+              key={chat.id}
+              className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-lg cursor-pointer"
+              onClick={() => selectChat(chat.id)}
+            >
               <MessageSquare size={16} />
-              <span className="truncate">{chat}</span>
+              <span className="truncate">{chat.title}</span>
             </div>
           ))}
         </div>
