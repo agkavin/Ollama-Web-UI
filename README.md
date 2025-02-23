@@ -17,14 +17,14 @@ Ollama WebUI is an open-source browser-based interface for interacting with loca
 ### Pre-requisites
 Ensure you have the following installed:
 - **Python (>=3.8)** - [Installation Guide](https://www.python.org/downloads/)
-- **Node.js (>=16.x)** - [Installation Guide](https://nodejs.org/)
-- **Bun** - [Installation Guide](https://bun.sh/)
+- [Node.js](https://nodejs.org/) (Latest LTS recommended)
+- [Vite Official Guide](https://vitejs.dev/guide/)
 - **Ollama (Local AI Provider)** - [Installation Guide](https://ollama.ai/)
 - **Any OpenAI API Compatible Endpoint** (LM Studio, llamafile, etc.)
 
 ### Clone the repository
 ```bash
-git clone https://github.com/your-username/ollama-webui.git
+git clone [https://github.com//ollama-webui.git](https://github.com/agkavin/Ollama-Web-UI)
 cd ollama-webui
 ```
 
