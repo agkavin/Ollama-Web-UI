@@ -87,7 +87,7 @@ Contributions are welcome! If you have ideas, feature requests, or bug reports, 
 If you find this project useful, consider supporting it:
 - ⭐ Star the repository
 - 🛠️ Contribute to development
-- ☕ Buy me a coffee on [Ko-fi](https://ko-fi.com/your-username)
+
 
 ## License
 MIT
