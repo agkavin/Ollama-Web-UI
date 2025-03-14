@@ -2,4 +2,7 @@ backend/utils/__pycache__/*
 **/__pycache__/*
 temp/vector_store/*
 temp/web_search_vectors/*
-backend/config/config.json
+config/config.json
+
+
+

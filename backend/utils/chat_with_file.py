@@ -46,7 +46,6 @@ class ChatWithFiles:
     def load_config(self):
         default_config = {
             "embedding_model": "nomic-embed-text",
-            "num_chunks": 3,
             "chunk_size": 1000,
             "chunk_overlap": 100,
             "top_k": 3
@@ -58,6 +57,8 @@ class ChatWithFiles:
         else:
             self.config = default_config
             self.save_config()
+
+
 
     def save_config(self):
         if not os.path.exists(os.path.dirname(self.config_path)):
@@ -102,7 +103,7 @@ class ChatWithFiles:
         # Create the retriever for RAG
         retriever = self.vector_store.as_retriever(
             search_type="similarity",
-            search_kwargs={'k': self.config["num_chunks"]}
+            search_kwargs={'k': 3}
         )
 
         # Setup the chain
@@ -125,14 +126,6 @@ class ChatWithFiles:
         self.save_config()
         self.embeddings = OllamaEmbeddings(model=model)
         self.initialize_vector_store()
-        self.setup_rag_chain()
-
-    def get_num_chunks(self) -> int:
-        return self.config["num_chunks"]
-
-    def set_num_chunks(self, num: int) -> None:
-        self.config["num_chunks"] = num
-        self.save_config()
         self.setup_rag_chain()
 
     def get_chunk_size(self) -> int:

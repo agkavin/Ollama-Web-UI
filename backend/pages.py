@@ -72,7 +72,6 @@ class SettingsPage:
     def get_config(self) -> Dict[str, Any]:
         return {
             "embedding_model": self.chat_files.get_embedding_model(),
-            "num_chunks": self.chat_files.get_num_chunks(),
             "chunk_size": self.chat_files.get_chunk_size(),
             "chunk_overlap": self.chat_files.get_chunk_overlap(),
             "top_k": self.web_search.get_top_k()
@@ -80,20 +79,19 @@ class SettingsPage:
 
     def update_config(self, 
                          embedding_model: str = None,
-                         num_chunks: int = None,
                          chunk_size: int = None,
                          chunk_overlap: int = None,
                          top_k: int = None) -> None:
         if embedding_model:
             self.chat_files.set_embedding_model(embedding_model)
-        if num_chunks:
-            self.chat_files.set_num_chunks(num_chunks)
         if chunk_size:
             self.chat_files.set_chunk_size(chunk_size)
         if chunk_overlap:
             self.chat_files.set_chunk_overlap(chunk_overlap)
         if top_k:
             self.web_search.set_top_k(top_k)
+
+        
 
     def clear_vector_db(self, request: str) -> bool:
         try:

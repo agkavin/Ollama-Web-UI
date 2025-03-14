@@ -45,14 +45,12 @@ class ClearVectorDBResponse(BaseModel):
 
 class ConfigResponse(BaseModel):
     embedding_model: str
-    num_chunks: int
     chunk_size: int
     chunk_overlap: int
     top_k: int
 
 class UpdateConfigRequest(BaseModel):
     embedding_model: Optional[str] = None
-    num_chunks: Optional[int] = None
     chunk_size: Optional[int] = None
     chunk_overlap: Optional[int] = None
     top_k: Optional[int] = None

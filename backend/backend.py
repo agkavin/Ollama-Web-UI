@@ -170,7 +170,6 @@ async def update_config(config: UpdateConfigRequest):
     try:
         settings_page.update_config(
             embedding_model=config.embedding_model,
-            num_chunks=config.num_chunks,
             chunk_size=config.chunk_size,
             chunk_overlap=config.chunk_overlap,
             top_k=config.top_k
